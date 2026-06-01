@@ -158,7 +158,6 @@ No guidance. No template. Just go.
 
 ## Post-Battle Debrief
 
-After all rounds, answer these:
 
 | Question | Your Answer |
 |---|---|
@@ -172,6 +171,5 @@ After all rounds, answer these:
 
 > The person who won today didn't necessarily know more about AI.  
 > They knew how to *communicate* with it better.  
-> That's prompt engineering — and you've been doing it for 2 hours now.
+> That's prompt engineering — and we've been doing it for 2 hours now.
 
-→ Head to the **Capstone** to finish your Study Buddy prompt and wrap up.
