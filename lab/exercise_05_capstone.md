@@ -119,7 +119,7 @@ Keep the total response under 400 words.
 
 ## Share Your Prompt (Optional — Volunteers)
 
-Ninad will ask 2–3 people to project their final prompt on screen.
+I will ask 2–3 people to project their final prompt on screen.
 
 When sharing, be ready to say:
 1. **What subject** you chose
