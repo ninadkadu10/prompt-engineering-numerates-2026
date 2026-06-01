@@ -86,5 +86,5 @@ The path from "I can write a good prompt" to "I can build an AI product" is shor
 
 ---
 
-*Questions? Reach Ninad at ninadkadu0606@gmail.com or linkedin.com/in/ninadkadu*  
-*Repo: github.com/ninadkadu/prompt-engineering-mitwpu-2026*
+*Questions? Reach Ninad at ninadkadu0606@gmail.com or https://in.linkedin.com/in/ninad-kadu-262736206
+*Repo: [github.com/ninadkadu/prompt-engineering-mitwpu-2026*](https://github.com/ninadkadu10/prompt-engineering-numerates-2026)
