@@ -234,5 +234,5 @@ or: "Make it funnier / simpler / more formal."
 
 ---
 
-*Made with love at MIT-WPU | Numerates Club | June 2, 2026*  
-*Session by Ninad Kadu — ninadkadu0606@gmail.com | github.com/ninadkadu*
+*Made with love for Numerates Club, MIT-WPU | June 2, 2026*  
+*Session by Ninad Kadu — ninadkadu0606@gmail.com 
