@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PromptForge — Prompt Engineering Assistant</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d1b2a;
+      --bg2: #111f2f;
+      --card: #16293d;
+      --border: #1e3550;
+      --text: #e8edf2;
+      --text2: #8ba4bc;
+      --accent: #00d4ff;
+      --accent-dim: rgba(0, 212, 255, 0.12);
+      --green: #00e576;
+      --yellow: #ffd600;
+      --orange: #ff6b35;
+      --red: #ff4757;
+      --purple: #9b59b6;
+      --btn: #0e3a52;
+      --btn-hover: #1a4f6e;
+      --radius: 6px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-size: 14px;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .logo-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+    .logo-text { font-size: 15px; font-weight: 700; letter-spacing: 0.3px; }
+    .logo-sub  { font-size: 11px; color: var(--text2); margin-left: 6px; }
+    header .spacer { flex: 1; }
+    .header-tag {
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      color: var(--text2);
+    }
+
+    /* ── TABS ── */
+    .tabs {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      padding: 0 24px;
+    }
+    .tab {
+      padding: 10px 18px;
+      font-size: 13px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      color: var(--text2);
+      transition: color 0.15s, border-color 0.15s;
+      user-select: none;
+    }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+    .tab:hover:not(.active) { color: var(--text); }
+
+    /* ── LAYOUT ── */
+    .body-wrap { max-width: 860px; margin: 0 auto; padding: 28px 24px 60px; }
+
+    /* ── LABELS ── */
+    .label { font-size: 11px; font-weight: 600; color: var(--text2); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 8px; }
+
+    /* ── TEXTAREA / INPUT ── */
+    textarea, input[type="text"] {
+      width: 100%;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-size: 14px;
+      font-family: inherit;
+      padding: 10px 12px;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.15s;
+      line-height: 1.6;
+    }
+    textarea:focus, input[type="text"]:focus { border-color: var(--accent); }
+    textarea::placeholder, input::placeholder { color: var(--text2); }
+    #lazy-input { min-height: 100px; }
+
+    /* ── PROMPT TYPE PILLS ── */
+    .type-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .type-pill {
+      padding: 5px 16px;
+      border-radius: 4px;
+      font-size: 13px;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      color: var(--text2);
+      background: transparent;
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .type-pill:hover { border-color: var(--accent); color: var(--text); }
+    .type-pill.active {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .type-hint { font-size: 12px; color: var(--text2); margin-top: 6px; min-height: 18px; }
+
+    /* ── SELECT ── */
+    select {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-size: 14px;
+      padding: 8px 12px;
+      outline: none;
+      cursor: pointer;
+      width: 100%;
+      max-width: 280px;
+    }
+    select:focus { border-color: var(--accent); }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 18px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: background 0.15s, border-color 0.15s;
+      user-select: none;
+      font-family: inherit;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #0d1b2a;
+      font-weight: 700;
+    }
+    .btn-primary:hover { background: #33deff; }
+    .btn-primary:disabled { background: var(--btn); color: var(--text2); cursor: not-allowed; }
+    .btn-ghost {
+      background: transparent;
+      color: var(--text2);
+      border-color: var(--border);
+    }
+    .btn-ghost:hover { background: var(--card); color: var(--text); }
+    .btn-sm { padding: 5px 12px; font-size: 12px; }
+
+    /* ── DIVIDER ── */
+    .divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+    /* ── OUTPUT CARD ── */
+    .output-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .output-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg2);
+    }
+    .output-header .title { font-size: 13px; font-weight: 600; flex: 1; }
+    .output-body {
+      padding: 16px;
+      font-size: 13px;
+      line-height: 1.75;
+      color: var(--text);
+      white-space: pre-wrap;
+      font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+      max-height: 380px;
+      overflow-y: auto;
+    }
+    .output-body::-webkit-scrollbar { width: 6px; }
+    .output-body::-webkit-scrollbar-track { background: var(--card); }
+    .output-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* ── PILL BADGE ── */
+    .badge {
+      font-size: 11px;
+      padding: 2px 9px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+    .badge-code     { background: rgba(0,212,255,0.15); color: var(--accent); }
+    .badge-standard { background: rgba(139,164,188,0.15); color: var(--text2); }
+    .badge-reasoning{ background: rgba(255,214,0,0.15); color: var(--yellow); }
+    .badge-research { background: rgba(0,229,118,0.15); color: var(--green); }
+    .badge-creative { background: rgba(255,107,53,0.15); color: var(--orange); }
+
+    /* ── CONTEXT AREA ── */
+    #context-wrap { margin-top: 8px; display: none; }
+    #context-wrap.visible { display: block; }
+
+    /* ── SAVE ROW ── */
+    #save-row { display: none; margin-top: 12px; }
+    #save-row.visible { display: flex; gap: 8px; align-items: center; }
+
+    /* ── LIBRARY ── */
+    .lib-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+    .lib-card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .lib-card-title { font-weight: 600; flex: 1; font-size: 14px; }
+    .lib-card-body { padding: 10px 14px; font-size: 12px; color: var(--text2); font-style: italic; line-height: 1.6; }
+
+    /* ── SECTION HEADING ── */
+    h2 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+    h2 + p { color: var(--text2); font-size: 13px; margin-bottom: 20px; }
+
+    /* ── EMPTY STATE ── */
+    .empty { text-align: center; padding: 48px 0; color: var(--text2); }
+    .empty p { margin-bottom: 16px; }
+
+    /* ── ROW ── */
+    .row { display: flex; align-items: center; gap: 10px; }
+    .stack { display: flex; flex-direction: column; gap: 14px; }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--green);
+      color: #0d1b2a;
+      padding: 10px 20px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      font-weight: 600;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+      z-index: 99;
+    }
+    #toast.show { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo-dot"></div>
+  <span class="logo-text">PromptForge</span>
+  <span class="logo-sub">Prompt Engineering Assistant</span>
+  <div class="spacer"></div>
+  <span class="header-tag">Free &amp; Offline</span>
+</header>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" data-tab="quick">Quick Prompt</div>
+  <div class="tab" data-tab="library">Library</div>
+  <div class="tab" data-tab="my">My Prompts</div>
+</div>
+
+<!-- TOAST -->
+<div id="toast">Copied to clipboard</div>
+
+<!-- BODY -->
+<div class="body-wrap">
+
+  <!-- ── QUICK PROMPT ── -->
+  <div id="pane-quick" class="pane">
+    <div class="stack">
+
+      <!-- Lazy input -->
+      <div>
+        <div class="label">Describe your task (rough idea is fine)</div>
+        <textarea id="lazy-input" placeholder="e.g.  I want to generate code for bubble sort that can be used in a custom class..."></textarea>
+      </div>
+
+      <!-- Context toggle -->
+      <div>
+        <button class="btn btn-ghost btn-sm" id="ctx-toggle">+ Add Context</button>
+        <span style="font-size:12px;color:var(--text2);margin-left:10px;">Optional — extra background that makes your prompt sharper</span>
+        <div id="context-wrap">
+          <textarea id="ctx-input" rows="2" placeholder="e.g.  I'm a BSc CS student, language is Java, the class should be reusable..."></textarea>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Prompt type -->
+      <div>
+        <div class="label">Prompt Type</div>
+        <div class="type-row" id="type-row">
+          <div class="type-pill active" data-type="Code">Code</div>
+          <div class="type-pill" data-type="Standard">Standard</div>
+          <div class="type-pill" data-type="Reasoning">Reasoning</div>
+          <div class="type-pill" data-type="Research">Research</div>
+          <div class="type-pill" data-type="Creative">Creative</div>
+        </div>
+        <div class="type-hint" id="type-hint">Adds best practices, comments, and error-handling instructions.</div>
+      </div>
+
+      <!-- Model selector -->
+      <div>
+        <div class="label">Model</div>
+        <select id="model-select">
+          <option value="gpt-4o">GPT-4o</option>
+          <option value="gpt-4o-mini">GPT-4o Mini</option>
+          <option value="claude-35">Claude 3.5 Sonnet</option>
+          <option value="gemini-15">Gemini 1.5 Pro</option>
+          <option value="llama-31">Llama 3.1 70B (Open-Source)</option>
+        </select>
+      </div>
+
+      <!-- Generate button -->
+      <div>
+        <button class="btn btn-primary" id="generate-btn" style="width:100%;justify-content:center;font-size:15px;padding:12px;">
+          &#10024; Generate Prompt
+        </button>
+      </div>
+
+      <!-- Output -->
+      <div id="output-section" style="display:none;">
+        <div class="divider"></div>
+        <div class="output-card">
+          <div class="output-header">
+            <span class="title">Generated Prompt</span>
+            <span class="badge" id="output-badge">Code</span>
+            <button class="btn btn-ghost btn-sm" id="copy-btn">Copy</button>
+            <button class="btn btn-ghost btn-sm" id="save-btn">Save</button>
+          </div>
+          <div class="output-body" id="output-text"></div>
+        </div>
+        <div class="row" id="save-row">
+          <input type="text" id="save-title" placeholder="Name this prompt..." style="flex:1;padding:7px 12px;" />
+          <button class="btn btn-ghost btn-sm" id="confirm-save-btn">Confirm Save</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── LIBRARY ── -->
+  <div id="pane-library" class="pane" style="display:none;">
+    <h2>Prompt Library</h2>
+    <p>Ready-made prompts — click <strong>Use</strong> to load into the editor.</p>
+    <div id="library-list"></div>
+  </div>
+
+  <!-- ── MY PROMPTS ── -->
+  <div id="pane-my" class="pane" style="display:none;">
+    <h2>My Prompts</h2>
+    <p>Prompts you've saved appear here.</p>
+    <div id="my-list">
+      <div class="empty">
+        <p>No saved prompts yet. Generate a prompt and click Save.</p>
+        <button class="btn btn-ghost" onclick="switchTab('quick')">Go to Quick Prompt</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── State ─────────────────────────────────────────────────────────────────────
+let activeType = "Code";
+let contextVisible = false;
+let outputVisible = false;
+let saveRowVisible = false;
+let myPrompts = JSON.parse(localStorage.getItem("pf_prompts") || "[]");
+
+// ── Library data ──────────────────────────────────────────────────────────────
+const LIBRARY = [
+  { id:"l1", title:"Debug Python Code",       type:"Code",
+    text:"Act as a senior Python engineer. Debug the following code, explain each bug clearly, and provide a corrected version with inline comments explaining every fix." },
+  { id:"l2", title:"Explain ML Concept",      type:"Standard",
+    text:"Act as a university ML professor. Explain [concept] to a BSc Statistics student using a real-world analogy from everyday life. Keep it under 150 words." },
+  { id:"l3", title:"Step-by-Step Maths",      type:"Reasoning",
+    text:"Solve this problem step by step, showing every calculation: [problem]. Let's think through it carefully before answering." },
+  { id:"l4", title:"Research Overview",       type:"Research",
+    text:"Research [topic] for a student project. Cover: (1) definition, (2) key concepts, (3) real-world applications, (4) one recent development. Under 300 words." },
+  { id:"l5", title:"Cover Letter Draft",      type:"Standard",
+    text:"Act as a career coach. Write a cover letter for a [role] position at [company type]. I am a [your background] student with [your skills]. Under 250 words. Professional but not robotic." },
+  { id:"l6", title:"SQL Query Helper",        type:"Code",
+    text:"Act as a senior database engineer. Write a SQL query that [requirement]. Explain each clause for a beginner. Include a sample dataset example." },
+  { id:"l7", title:"Study Quiz Generator",    type:"Standard",
+    text:"Act as a professor. Create 5 MCQ questions on [topic] for a [level] student. After all 5 questions, provide the answer key with a one-line explanation for each answer." },
+  { id:"l8", title:"Mock Interview",          type:"Reasoning",
+    text:"Act as a tough but fair technical interviewer at a top tech company. I am applying for [role]. Ask me 5 questions of increasing difficulty. After each answer I give, provide feedback: what I got right, what I missed, and a hint if I need it." },
+];
+
+// ── Prompt type hints ─────────────────────────────────────────────────────────
+const TYPE_HINTS = {
+  Code:      "Adds best practices, comments, and error-handling instructions.",
+  Standard:  "Structures the task with role, format, key points, and examples.",
+  Reasoning: "Adds step-by-step chain-of-thought reasoning before the final answer.",
+  Research:  "Formats for a structured research overview with practical implications.",
+  Creative:  "Unlocks bold, original, and unexpected creative outputs.",
+};
+
+const BADGE_CLASS = {
+  Code:"badge-code", Standard:"badge-standard", Reasoning:"badge-reasoning",
+  Research:"badge-research", Creative:"badge-creative",
+};
+
+// ── Prompt builder ─────────────────────────────────────────────────────────────
+function buildPrompt(lazy, type, ctx) {
+  const t = lazy.trim();
+  if (!t) return "";
+  const ctxLine = ctx.trim() ? `\nContext: ${ctx.trim()}\n` : "";
+  const map = {
+    Code:
+`Act as a senior software engineer with 10+ years of experience.
+${ctxLine}
+Task: ${t}
+
+Requirements:
+- Write clean, readable, well-commented code
+- Follow best practices and SOLID principles
+- Include error handling where appropriate
+- Add inline comments explaining non-obvious logic
+- Provide a brief usage example at the end
+
+Provide the complete implementation.`,
+
+    Standard:
+`Role: Expert professional in the relevant domain.
+${ctxLine}
+Task: ${t}
+
+Format your response as:
+1. Direct answer (2–3 sentences)
+2. Key supporting points (bullet list)
+3. One concrete real-world example
+4. Any important caveats or limitations`,
+
+    Reasoning:
+`${t}
+${ctxLine}
+Think through this step by step:
+1. Identify the core question or problem
+2. List all relevant constraints and assumptions
+3. Evaluate each possible approach systematically
+4. Reason through the implications of each option
+5. State a well-justified final answer
+
+Show all reasoning before reaching the conclusion.`,
+
+    Research:
+`Conduct a research overview on the following:
+
+${t}
+${ctxLine}
+Structure your response as:
+1. Executive summary (2–3 sentences)
+2. Background and key definitions
+3. Current state of knowledge / key findings
+4. Practical implications for students / practitioners
+5. Three resources for further reading
+
+Use specific examples and data where possible.`,
+
+    Creative:
+`You are a creative expert with a bold, original perspective.
+${ctxLine}
+Creative brief: ${t}
+
+Approach this with:
+- Unexpected angles over obvious approaches
+- Vivid, specific details over generalities
+- An engaging, distinctive voice throughout
+- Bold ideas — avoid safe, predictable outputs
+
+Surprise the reader.`,
+  };
+  return map[type];
+}
+
+// ── Tab switching ─────────────────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll(".pane").forEach(p => p.style.display = "none");
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.getElementById("pane-" + name).style.display = "block";
+  document.querySelector(`[data-tab="${name}"]`).classList.add("active");
+  if (name === "my") renderMyPrompts();
+  if (name === "library") renderLibrary();
+}
+
+document.querySelectorAll(".tab").forEach(tab => {
+  tab.addEventListener("click", () => switchTab(tab.dataset.tab));
+});
+
+// ── Type pills ────────────────────────────────────────────────────────────────
+document.querySelectorAll(".type-pill").forEach(pill => {
+  pill.addEventListener("click", () => {
+    document.querySelectorAll(".type-pill").forEach(p => p.classList.remove("active"));
+    pill.classList.add("active");
+    activeType = pill.dataset.type;
+    document.getElementById("type-hint").textContent = TYPE_HINTS[activeType];
+  });
+});
+
+// ── Context toggle ────────────────────────────────────────────────────────────
+document.getElementById("ctx-toggle").addEventListener("click", () => {
+  contextVisible = !contextVisible;
+  const wrap = document.getElementById("context-wrap");
+  const btn  = document.getElementById("ctx-toggle");
+  wrap.classList.toggle("visible", contextVisible);
+  btn.textContent = contextVisible ? "— Hide Context" : "+ Add Context";
+});
+
+// ── Generate ──────────────────────────────────────────────────────────────────
+document.getElementById("generate-btn").addEventListener("click", () => {
+  const lazy = document.getElementById("lazy-input").value;
+  const ctx  = document.getElementById("ctx-input").value;
+  const result = buildPrompt(lazy, activeType, ctx);
+  if (!result) return;
+
+  document.getElementById("output-text").textContent = result;
+  const badge = document.getElementById("output-badge");
+  badge.textContent = activeType;
+  badge.className = "badge " + BADGE_CLASS[activeType];
+  document.getElementById("output-section").style.display = "block";
+  saveRowVisible = false;
+  document.getElementById("save-row").classList.remove("visible");
+  document.getElementById("save-title").value = "";
+});
+
+// ── Copy ──────────────────────────────────────────────────────────────────────
+document.getElementById("copy-btn").addEventListener("click", () => {
+  const text = document.getElementById("output-text").textContent;
+  navigator.clipboard.writeText(text).then(() => showToast("Copied to clipboard"));
+});
+
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2000);
+}
+
+// ── Save toggle ───────────────────────────────────────────────────────────────
+document.getElementById("save-btn").addEventListener("click", () => {
+  saveRowVisible = !saveRowVisible;
+  document.getElementById("save-row").classList.toggle("visible", saveRowVisible);
+  if (saveRowVisible) document.getElementById("save-title").focus();
+});
+
+// ── Confirm save ──────────────────────────────────────────────────────────────
+document.getElementById("confirm-save-btn").addEventListener("click", () => {
+  const title = document.getElementById("save-title").value.trim();
+  const text  = document.getElementById("output-text").textContent;
+  if (!title || !text) return;
+  const newP = { id: Date.now().toString(), title, type: activeType, text };
+  myPrompts = [newP, ...myPrompts];
+  localStorage.setItem("pf_prompts", JSON.stringify(myPrompts));
+  document.getElementById("save-row").classList.remove("visible");
+  document.getElementById("save-title").value = "";
+  saveRowVisible = false;
+  showToast("Saved to My Prompts");
+});
+
+// ── Library renderer ──────────────────────────────────────────────────────────
+function renderLibrary() {
+  const container = document.getElementById("library-list");
+  container.innerHTML = LIBRARY.map(item => `
+    <div class="lib-card">
+      <div class="lib-card-header">
+        <span class="lib-card-title">${item.title}</span>
+        <span class="badge ${BADGE_CLASS[item.type]}">${item.type}</span>
+        <button class="btn btn-ghost btn-sm" onclick="usePrompt(${JSON.stringify(item).replace(/"/g,'&quot;')})">Use</button>
+      </div>
+      <div class="lib-card-body">${item.text.slice(0, 130)}…</div>
+    </div>
+  `).join("");
+}
+
+// ── My prompts renderer ───────────────────────────────────────────────────────
+function renderMyPrompts() {
+  const container = document.getElementById("my-list");
+  if (!myPrompts.length) {
+    container.innerHTML = `<div class="empty"><p>No saved prompts yet. Generate a prompt and click Save.</p><button class="btn btn-ghost" onclick="switchTab('quick')">Go to Quick Prompt</button></div>`;
+    return;
+  }
+  container.innerHTML = myPrompts.map(item => `
+    <div class="lib-card">
+      <div class="lib-card-header">
+        <span class="lib-card-title">${item.title}</span>
+        <span class="badge ${BADGE_CLASS[item.type] || 'badge-standard'}">${item.type}</span>
+        <button class="btn btn-ghost btn-sm" onclick="usePrompt(${JSON.stringify(item).replace(/"/g,'&quot;')})">Use</button>
+        <button class="btn btn-ghost btn-sm" onclick="deletePrompt('${item.id}')">Delete</button>
+      </div>
+      <div class="lib-card-body">${item.text.slice(0, 130)}…</div>
+    </div>
+  `).join("");
+}
+
+// ── Use a library/saved prompt ────────────────────────────────────────────────
+function usePrompt(item) {
+  document.getElementById("lazy-input").value = item.text;
+  document.querySelectorAll(".type-pill").forEach(p => p.classList.remove("active"));
+  const pill = document.querySelector(`[data-type="${item.type}"]`);
+  if (pill) { pill.classList.add("active"); activeType = item.type; }
+  document.getElementById("type-hint").textContent = TYPE_HINTS[activeType] || "";
+  document.getElementById("output-section").style.display = "none";
+  switchTab("quick");
+}
+
+// ── Delete saved prompt ────────────────────────────────────────────────────────
+function deletePrompt(id) {
+  myPrompts = myPrompts.filter(p => p.id !== id);
+  localStorage.setItem("pf_prompts", JSON.stringify(myPrompts));
+  renderMyPrompts();
+}
+
+// ── Initial render ────────────────────────────────────────────────────────────
+renderLibrary();
+</script>
+</body>
+</html>
