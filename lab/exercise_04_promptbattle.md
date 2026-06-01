@@ -8,7 +8,7 @@
 
 > You've learned the techniques. Now prove it.
 
-This is a **competitive** exercise. Three rounds. Different themes. You write a prompt, run it in ChatGPT, and share your output. The audience votes. The winner of each round gets a shout-out from Ninad.
+This is a **competitive** exercise. Three rounds. Different themes. You write a prompt, run it in ChatGPT, and share your output. The audience votes.
 
 **Rules:**
 1. You have **3 minutes** to write and run your prompt each round.
