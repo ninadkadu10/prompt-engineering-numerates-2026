@@ -74,7 +74,7 @@
 
 ---
 
-## Ninad's Personal Picks for Beginners
+## Personal Picks for Beginners
 
 1. **Start with:** ChatGPT Prompt Engineering for Developers (DeepLearning.AI, free, 1 hour) 
 2. **Then:** Build something small — a study quiz tool, a code explainer, a summariser — using ChatGPT's custom instructions or the API
